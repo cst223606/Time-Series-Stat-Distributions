@@ -4,11 +4,11 @@ from scipy.stats import laplace
 import warnings
 
 def kumaraswamy_laplace_pdf(x, mu, sigma, a, b):
-    """ Kumaraswamy-Laplace PDF 函数 """
+    # PDF 
     z = (x - mu) / sigma
     abs_z = np.abs(z)
     
-    # 避免数值下溢
+    # avoid numerical underflow
     with np.errstate(over='ignore', under='ignore'):
         base = 1.0 - np.exp(-abs_z)
         term1 = base**(a - 1)
@@ -18,21 +18,21 @@ def kumaraswamy_laplace_pdf(x, mu, sigma, a, b):
     return pdf
 
 def neg_log_likelihood(params, data):
-    """ 负对数似然函数 """
+    # negative log likelihood function
     mu, sigma, a, b = params
     if sigma <= 0 or a <= 0 or b <= 0:
-        return np.inf  # 约束条件
+        return np.inf  # constraint
     
     pdf_values = kumaraswamy_laplace_pdf(data, mu, sigma, a, b)
-    log_likelihood = np.log(pdf_values + 1e-12).sum()  # 防止log(0)
+    log_likelihood = np.log(pdf_values + 1e-12).sum()  # prevent log(0)
     return -log_likelihood
 
 def fit_kumaraswamy_laplace(data, initial_guess=None):
     """
-    使用最大似然估计拟合 Kumaraswamy-Laplace 分布
-    返回最佳参数: mu, sigma, a, b
+    fit Kumaraswamy-Laplace distribution using MLE
+    return params: mu, sigma, a, b
     """
-    # 初始猜测值
+    # initialize guess
     if initial_guess is None:
         mu_init = np.median(data)
         sigma_init = laplace.scale(data)
